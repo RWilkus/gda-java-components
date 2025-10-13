@@ -11,6 +11,10 @@
 
 package programmingtheiot.data;
 
+import java.util.logging.Level;
+
+import java.util.logging.Logger;
+
 import java.nio.file.FileSystems;
 
 import java.nio.file.Files;
@@ -27,13 +31,11 @@ public class DataUtil
 {
 	// static
 	
+	private static final Logger   _Logger   =
+			Logger.getLogger(DataUtil.class.getName());
+		
 	private static final DataUtil _Instance = new DataUtil();
 
-	/**
-	 * Returns the Singleton instance of this class.
-	 * 
-	 * @return ConfigUtil
-	 */
 	public static final DataUtil getInstance()
 	{
 		return _Instance;
