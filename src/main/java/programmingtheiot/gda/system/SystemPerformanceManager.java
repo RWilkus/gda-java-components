@@ -37,6 +37,9 @@ public class SystemPerformanceManager
 
 	private Runnable taskRunner = null;
 	private boolean isStarted = false;
+	
+	private String locationID = ConfigConst.NOT_SET;
+	private IDataMessageListener dataMsgListener = null;
 	// constructors
 	
 	/**
@@ -60,6 +63,10 @@ public class SystemPerformanceManager
 		this.taskRunner = () -> {
 			this.handleTelemetry();
 		};
+		
+		this.locationID =
+				ConfigUtil.getInstance().getProperty(
+					ConfigConst.GATEWAY_DEVICE, ConfigConst.LOCATION_ID_PROP, ConfigConst.NOT_SET);
 	}
 	
 	
@@ -70,12 +77,25 @@ public class SystemPerformanceManager
 		float cpuUtil = this.sysCpuUtilTask.getTelemetryValue();
 		float memUtil = this.sysMemUtilTask.getTelemetryValue();
 		
-		// NOTE: you may need to change the logging level to 'info' to see the message
-		_Logger.log(Level.INFO, "CPU utilization: {0}, Mem utilization: {1}", new Object[]{cpuUtil, memUtil});
+		// TODO: change the log level to 'info' for testing purposes
+		_Logger.fine("CPU utilization: " + cpuUtil + ", Mem utilization: " + memUtil);
+		
+		SystemPerformanceData spd = new SystemPerformanceData();
+		spd.setLocationID(this.locationID);
+		spd.setCpuUtilization(cpuUtil);
+		spd.setMemoryUtilization(memUtil);
+		
+		if (this.dataMsgListener != null) {
+			this.dataMsgListener.handleSystemPerformanceMessage(
+				ResourceNameEnum.GDA_SYSTEM_PERF_MSG_RESOURCE, spd);
+		}
 	}
 	
 	public void setDataMessageListener(IDataMessageListener listener)
 	{
+		if (listener != null) {
+			this.dataMsgListener = listener;
+		}
 	}
 	
 	public boolean startManager()
