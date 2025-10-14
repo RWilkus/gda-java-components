@@ -12,7 +12,6 @@
 package programmingtheiot.gda.app;
 
 import java.util.logging.Level;
-
 import java.util.logging.Logger;
 
 import programmingtheiot.common.ConfigConst;
@@ -183,6 +182,7 @@ public class DeviceDataManager implements IDataMessageListener
 	public void startManager()
 	{
 		if (this.sysPerfMgr != null) {
+			_Logger.info("Starting DeviceDataManager...");
 			this.sysPerfMgr.startManager();
 		}
 	}
@@ -190,6 +190,7 @@ public class DeviceDataManager implements IDataMessageListener
 	public void stopManager()
 	{
 		if (this.sysPerfMgr != null) {
+			_Logger.info("Stopping DeviceDataManager...");
 			this.sysPerfMgr.stopManager();
 		}
 	}
