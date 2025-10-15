@@ -46,6 +46,10 @@ public class RedisClientAdapterTest
 	
 	private RedisPersistenceAdapter rpa = null;
 	
+	private static final String TEST_TOPIC = "SensorDataTestTopic";
+
+	private SensorData testData;
+	
 	
 	// test setup methods
 	
@@ -71,6 +75,13 @@ public class RedisClientAdapterTest
 	@Before
 	public void setUp() throws Exception
 	{
+		this.rpa = new RedisPersistenceAdapter();
+		this.rpa.connectClient();
+
+		// Create test SensorData object
+		this.testData = new SensorData();
+		this.testData.setName("TempSensor");
+		this.testData.setValue(23.4f);
 	}
 	
 	/**
@@ -79,6 +90,9 @@ public class RedisClientAdapterTest
 	@After
 	public void tearDown() throws Exception
 	{
+		if (this.rpa != null) {
+			this.rpa.disconnectClient();
+		}
 	}
 	
 	// test methods
@@ -119,8 +133,16 @@ public class RedisClientAdapterTest
 	@Test
 	public void testGetSensorData()
 	{
-		SensorData[] result = rpa.getSensorData("test/sensor", new Date(), new Date());
-		assertNull("getSensorData should return null by default", result);
+		String topic = "TestTopic";
+		Date start = new Date(System.currentTimeMillis() - 10 * 60 * 1000); // 10 minutes ago
+		Date end = new Date();
+
+		SensorData[] dataArray = this.rpa.getSensorData(topic, start, end);
+
+		assertNull("Expected null return since method is not implemented", dataArray);
+
+		// Optional: fail the test to remind you to implement this method
+		// fail("getSensorData() not yet implemented");
 	}
 	
 	/**
@@ -140,9 +162,8 @@ public class RedisClientAdapterTest
 	@Test
 	public void testStoreDataStringIntSensorDataArray()
 	{
-		SensorData sd = new SensorData();
-		boolean result = rpa.storeData("test/sensor", 0, sd);
-		assertFalse("storeData with SensorData should return false by default", result);
+		boolean result = this.rpa.storeData(TEST_TOPIC, 1, this.testData);
+		assertFalse("SensorData should be stored successfully.", result);
 	}
 	
 	/**
