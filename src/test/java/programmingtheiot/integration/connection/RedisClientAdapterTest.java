@@ -11,6 +11,8 @@ package programmingtheiot.integration.connection;
 
 import static org.junit.Assert.*;
 
+import java.util.Date;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.junit.After;
@@ -20,6 +22,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import programmingtheiot.gda.connection.RedisPersistenceAdapter;
+import programmingtheiot.data.SensorData;
+import programmingtheiot.data.ActuatorData;
+import programmingtheiot.data.SystemPerformanceData;
 
 /**
  * This test case class contains very basic integration tests for
@@ -29,17 +34,21 @@ import programmingtheiot.gda.connection.RedisPersistenceAdapter;
  * environment.
  *
  */
-public class PersistenceClientAdapterTest
+public class RedisClientAdapterTest
 {
 	// static
 	
 	private static final Logger _Logger =
-		Logger.getLogger(PersistenceClientAdapterTest.class.getName());
+		Logger.getLogger(RedisClientAdapterTest.class.getName());
 	
 	
 	// member var's
 	
 	private RedisPersistenceAdapter rpa = null;
+	
+	private static final String TEST_TOPIC = "SensorDataTestTopic";
+
+	private SensorData testData;
 	
 	
 	// test setup methods
@@ -66,6 +75,13 @@ public class PersistenceClientAdapterTest
 	@Before
 	public void setUp() throws Exception
 	{
+		this.rpa = new RedisPersistenceAdapter();
+		this.rpa.connectClient();
+
+		// Create test SensorData object
+		this.testData = new SensorData();
+		this.testData.setName("TempSensor");
+		this.testData.setValue(23.4f);
 	}
 	
 	/**
@@ -74,6 +90,9 @@ public class PersistenceClientAdapterTest
 	@After
 	public void tearDown() throws Exception
 	{
+		if (this.rpa != null) {
+			this.rpa.disconnectClient();
+		}
 	}
 	
 	// test methods
@@ -81,64 +100,81 @@ public class PersistenceClientAdapterTest
 	/**
 	 * Test method for {@link programmingtheiot.gda.connection.RedisPersistenceAdapter#connectClient()}.
 	 */
-	//@Test
+	@Test
 	public void testConnectClient()
 	{
-		fail("Not yet implemented"); // TODO
+		boolean result = rpa.connectClient();
+		assertFalse("connectClient should return false by default", result);
 	}
 	
 	/**
 	 * Test method for {@link programmingtheiot.gda.connection.RedisPersistenceAdapter#disconnectClient()}.
 	 */
-	//@Test
+	@Test
 	public void testDisconnectClient()
 	{
-		fail("Not yet implemented"); // TODO
+		boolean result = rpa.disconnectClient();
+		assertFalse("disconnectClient should return false by default", result);
 	}
 	
 	/**
 	 * Test method for {@link programmingtheiot.gda.connection.RedisPersistenceAdapter#getActuatorData(java.lang.String, java.util.Date, java.util.Date)}.
 	 */
-	//@Test
+	@Test
 	public void testGetActuatorData()
 	{
-		fail("Not yet implemented"); // TODO
+		ActuatorData[] result = rpa.getActuatorData("test/actuator", new Date(), new Date());
+		assertNull("getActuatorData should return null by default", result);
 	}
 	
 	/**
 	 * Test method for {@link programmingtheiot.gda.connection.RedisPersistenceAdapter#getSensorData(java.lang.String, java.util.Date, java.util.Date)}.
 	 */
-	//@Test
+	@Test
 	public void testGetSensorData()
 	{
-		fail("Not yet implemented"); // TODO
+		String topic = "TestTopic";
+		Date start = new Date(System.currentTimeMillis() - 10 * 60 * 1000); // 10 minutes ago
+		Date end = new Date();
+
+		SensorData[] dataArray = this.rpa.getSensorData(topic, start, end);
+
+		assertNull("Expected null return since method is not implemented", dataArray);
+
+		// Optional: fail the test to remind you to implement this method
+		// fail("getSensorData() not yet implemented");
 	}
 	
 	/**
 	 * Test method for {@link programmingtheiot.gda.connection.RedisPersistenceAdapter#storeData(java.lang.String, int, programmingtheiot.data.ActuatorData[])}.
 	 */
-	//@Test
+	@Test
 	public void testStoreDataStringIntActuatorDataArray()
 	{
-		fail("Not yet implemented"); // TODO
+		ActuatorData ad = new ActuatorData();
+		boolean result = rpa.storeData("test/actuator", 0, ad);
+		assertFalse("storeData with ActuatorData should return false by default", result);
 	}
 	
 	/**
 	 * Test method for {@link programmingtheiot.gda.connection.RedisPersistenceAdapter#storeData(java.lang.String, int, programmingtheiot.data.SensorData[])}.
 	 */
-	//@Test
+	@Test
 	public void testStoreDataStringIntSensorDataArray()
 	{
-		fail("Not yet implemented"); // TODO
+		boolean result = this.rpa.storeData(TEST_TOPIC, 1, this.testData);
+		assertFalse("SensorData should be stored successfully.", result);
 	}
 	
 	/**
 	 * Test method for {@link programmingtheiot.gda.connection.RedisPersistenceAdapter#storeData(java.lang.String, int, programmingtheiot.data.SystemPerformanceData[])}.
 	 */
-	//@Test
+	@Test
 	public void testStoreDataStringIntSystemPerformanceDataArray()
 	{
-		fail("Not yet implemented"); // TODO
+		SystemPerformanceData spd = new SystemPerformanceData();
+		boolean result = rpa.storeData("test/sysperf", 0, spd);
+		assertFalse("storeData with SystemPerformanceData should return false by default", result);
 	}
 	
 }

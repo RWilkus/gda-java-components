@@ -40,6 +40,11 @@ public class RedisPersistenceAdapter implements IPersistenceClient
 	private static final Logger _Logger =
 		Logger.getLogger(RedisPersistenceAdapter.class.getName());
 	
+	private String host = "localhost";
+	private int port = 6379;
+	private Jedis redisClient = null;
+	private DataUtil dataUtil = DataUtil.getInstance();
+
 	// private var's
 	
 	
@@ -67,17 +72,27 @@ public class RedisPersistenceAdapter implements IPersistenceClient
 	@Override
 	public boolean connectClient()
 	{
-		return false;
+	    try {
+	        redisClient = new Jedis(host, port);
+	        _Logger.info("Connected to Redis at " + host + ":" + port);
+	        return true;
+	    } catch (JedisConnectionException e) {
+	        _Logger.log(Level.SEVERE, "Failed to connect to Redis", e);
+	        return false;
+	    }
 	}
 
-	/**
-	 *
-	 */
 	@Override
 	public boolean disconnectClient()
 	{
-		return false;
+	    if (redisClient != null) {
+	        redisClient.close();
+	        _Logger.info("Disconnected from Redis");
+	        return true;
+	    }
+	    return false;
 	}
+
 
 	/**
 	 *
