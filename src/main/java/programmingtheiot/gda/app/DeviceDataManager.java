@@ -63,6 +63,7 @@ public class DeviceDataManager implements IDataMessageListener
 	private IRequestResponseClient smtpClient = null;
 	private CoapServerGateway coapServer = null;
 	private SystemPerformanceManager sysPerfMgr = null;
+	private RedisPersistenceAdapter redisClient = null;
 	
 	// constructors
 	
@@ -71,6 +72,8 @@ public class DeviceDataManager implements IDataMessageListener
 		super();
 		
 		ConfigUtil configUtil = ConfigUtil.getInstance();
+		
+		this.redisClient = new RedisPersistenceAdapter();
 		
 		this.enableMqttClient =
 			configUtil.getBoolean(
@@ -118,6 +121,10 @@ public class DeviceDataManager implements IDataMessageListener
 				_Logger.warning("Error flag set for ActuatorData instance.");
 			}
 			
+			if (this.redisClient != null) {
+				this.redisClient.storeData(data.getName(), data.getTypeID(), data);
+			}
+			
 			return true;
 		} else {
 			return false;
@@ -152,6 +159,10 @@ public class DeviceDataManager implements IDataMessageListener
 				_Logger.warning("Error flag set for SensorData instance.");
 			}
 			
+			if (this.redisClient != null) {
+				this.redisClient.storeData(data.getName(), data.getTypeID(), data);
+			}
+			
 			return true;
 		} else {
 			return false;
@@ -167,6 +178,10 @@ public class DeviceDataManager implements IDataMessageListener
 			
 			if (data.hasError()) {
 				_Logger.warning("Error flag set for SystemPerformanceData instance.");
+			}
+			
+			if (this.redisClient != null) {
+				this.redisClient.storeData(data.getName(), data.getTypeID(), data);
 			}
 			
 			return true;
@@ -185,6 +200,9 @@ public class DeviceDataManager implements IDataMessageListener
 			_Logger.info("Starting DeviceDataManager...");
 			this.sysPerfMgr.startManager();
 		}
+		if (this.redisClient != null) {
+			this.redisClient.connectClient();
+		}
 	}
 	
 	public void stopManager()
@@ -192,6 +210,9 @@ public class DeviceDataManager implements IDataMessageListener
 		if (this.sysPerfMgr != null) {
 			_Logger.info("Stopping DeviceDataManager...");
 			this.sysPerfMgr.stopManager();
+		}
+		if (this.redisClient != null) {
+			this.redisClient.disconnectClient();
 		}
 	}
 
